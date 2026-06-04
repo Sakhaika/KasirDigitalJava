@@ -33,7 +33,7 @@ public class PanelLaporan extends JPanel {
     }
 
     private void buildUI() {
-        JLabel title = new JLabel("📊  Laporan Penjualan Harian");
+        JLabel title = new JLabel("Laporan Penjualan Harian");
         title.setFont(new Font("Segoe UI", Font.BOLD, 20));
         title.setForeground(TEXT_DARK);
         title.setBorder(BorderFactory.createEmptyBorder(0, 0, 12, 0));

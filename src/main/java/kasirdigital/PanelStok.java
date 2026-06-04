@@ -37,7 +37,7 @@ public class PanelStok extends JPanel {
     }
 
     private void buildUI() {
-        JLabel title = new JLabel("📦  Manajemen Stok Barang");
+        JLabel title = new JLabel("Manajemen Stok Barang");
         title.setFont(new Font("Segoe UI", Font.BOLD, 20));
         title.setForeground(TEXT_DARK);
         title.setBorder(BorderFactory.createEmptyBorder(0, 0, 12, 0));

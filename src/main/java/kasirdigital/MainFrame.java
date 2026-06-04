@@ -29,7 +29,8 @@ public class MainFrame extends JFrame {
 
         try {
             UIManager.setLookAndFeel(UIManager.getSystemLookAndFeelClassName());
-        } catch (Exception ignored) {}
+        } catch (Exception ignored) {
+        }
 
         buildLayout();
         setVisible(true);
@@ -69,7 +70,7 @@ public class MainFrame extends JFrame {
         logoPanel.setBackground(SIDEBAR_BG);
         logoPanel.setBorder(BorderFactory.createEmptyBorder(24, 16, 24, 16));
 
-        JLabel logo = new JLabel("🏪 KasirDigital");
+        JLabel logo = new JLabel("SiNiGer");
         logo.setFont(new Font("Segoe UI", Font.BOLD, 17));
         logo.setForeground(Color.WHITE);
 
@@ -86,24 +87,27 @@ public class MainFrame extends JFrame {
         sep.setPreferredSize(new Dimension(0, 1));
 
         // Navigation
-        JPanel navPanel = new JPanel(new GridLayout(3, 1, 0, 4));
+        JPanel navPanel = new JPanel();
+        navPanel.setLayout(new BoxLayout(navPanel, BoxLayout.Y_AXIS));
         navPanel.setBackground(SIDEBAR_BG);
         navPanel.setBorder(BorderFactory.createEmptyBorder(16, 8, 0, 8));
 
         String[][] menus = {
-            {"🛒", "Kasir / Transaksi", "kasir"},
-            {"📦", "Manajemen Stok", "stok"},
-            {"📊", "Laporan Penjualan", "laporan"}
+            {"[Kasir]", "Kasir / Transaksi", "kasir"},
+            {"[Stok]", "Manajemen Stok", "stok"},
+            {"[Lap.]", "Laporan Penjualan", "laporan"}
         };
 
         navBtns = new JButton[menus.length];
         for (int i = 0; i < menus.length; i++) {
             final int idx = i;
             final String panel = menus[i][2];
-            JButton btn = createNavBtn(menus[i][0] + "  " + menus[i][1]);
+            JButton btn = createNavBtn(menus[i][1]);
             btn.addActionListener(e -> switchPanel(panel, idx));
+            btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
             navBtns[i] = btn;
             navPanel.add(btn);
+            navPanel.add(Box.createVerticalStrut(4));
         }
 
         // Bottom info
@@ -137,12 +141,15 @@ public class MainFrame extends JFrame {
 
         btn.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
-                if (!btn.getBackground().equals(SIDEBAR_ACTIVE))
+                if (!btn.getBackground().equals(SIDEBAR_ACTIVE)) {
                     btn.setBackground(SIDEBAR_HOVER);
+                }
             }
+
             public void mouseExited(MouseEvent e) {
-                if (!btn.getBackground().equals(SIDEBAR_ACTIVE))
+                if (!btn.getBackground().equals(SIDEBAR_ACTIVE)) {
                     btn.setBackground(SIDEBAR_BG);
+                }
             }
         });
         return btn;
@@ -161,8 +168,12 @@ public class MainFrame extends JFrame {
                 navBtns[i].setFont(new Font("Segoe UI", Font.PLAIN, 13));
             }
         }
-        if ("laporan".equals(name)) panelLaporan.refresh();
-        if ("stok".equals(name)) panelStok.refreshTabel("");
+        if ("laporan".equals(name)) {
+            panelLaporan.refresh();
+        }
+        if ("stok".equals(name)) {
+            panelStok.refreshTabel("");
+        }
     }
 
     public static void main(String[] args) {

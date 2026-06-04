@@ -59,7 +59,7 @@ public class PanelKasir extends JPanel {
         JPanel p = new JPanel(new BorderLayout());
         p.setBackground(BG_MAIN);
         p.setBorder(BorderFactory.createEmptyBorder(0, 0, 8, 0));
-        JLabel title = new JLabel("\uD83D\uDED2  Transaksi Kasir");
+        JLabel title = new JLabel("Transaksi Kasir");
         title.setFont(new Font("Segoe UI", Font.BOLD, 20));
         title.setForeground(TEXT_DARK);
         JLabel tanggal = new JLabel(LocalDateTime.now()
@@ -189,8 +189,10 @@ public class PanelKasir extends JPanel {
             refreshKeranjang();
         });
 
-        JPanel btnPanel = new JPanel(new GridLayout(1, 2, 8, 0));
+        JPanel btnPanel = new JPanel(new FlowLayout(FlowLayout.CENTER, 8, 0));
         btnPanel.setBackground(BG_MAIN);
+        btnHapusItem.setPreferredSize(new Dimension(160, 36));
+        btnKosongkan.setPreferredSize(new Dimension(160, 36));
         btnPanel.add(btnHapusItem);
         btnPanel.add(btnKosongkan);
 
