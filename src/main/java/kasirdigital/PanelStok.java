@@ -24,7 +24,6 @@ public class PanelStok extends JPanel {
     private NumberFormat rupiah = NumberFormat.getCurrencyInstance(new Locale("id", "ID"));
     private DefaultTableModel modelStok;
     private JTable tabelStok;
-
     private JTextField txtKode, txtNama, txtHarga, txtStok, txtCari;
     private JComboBox<String> cmbKategoriForm;
 
@@ -37,7 +36,7 @@ public class PanelStok extends JPanel {
     }
 
     private void buildUI() {
-        JLabel title = new JLabel("Manajemen Stok Barang");
+        JLabel title = new JLabel("  Manajemen Stok Barang");
         title.setFont(new Font("Segoe UI", Font.BOLD, 20));
         title.setForeground(TEXT_DARK);
         title.setBorder(BorderFactory.createEmptyBorder(0, 0, 12, 0));
@@ -63,7 +62,7 @@ public class PanelStok extends JPanel {
         lbl.setFont(new Font("Segoe UI", Font.BOLD, 14));
         lbl.setForeground(TEXT_DARK);
 
-        txtCari = new JTextField("🔍  Cari barang...");
+        txtCari = new JTextField("Cari barang...");
         txtCari.setFont(new Font("Segoe UI", Font.PLAIN, 13));
         txtCari.setForeground(TEXT_MUTED);
         txtCari.setBorder(BorderFactory.createCompoundBorder(
@@ -71,7 +70,7 @@ public class PanelStok extends JPanel {
                 BorderFactory.createEmptyBorder(6, 10, 6, 10)));
         txtCari.addFocusListener(new FocusAdapter() {
             public void focusGained(FocusEvent e) {
-                if (txtCari.getText().startsWith("🔍")) {
+                if (txtCari.getText().equals("Cari barang...")) {
                     txtCari.setText("");
                     txtCari.setForeground(TEXT_DARK);
                 }
@@ -79,7 +78,7 @@ public class PanelStok extends JPanel {
 
             public void focusLost(FocusEvent e) {
                 if (txtCari.getText().isEmpty()) {
-                    txtCari.setText("🔍  Cari barang...");
+                    txtCari.setText("Cari barang...");
                     txtCari.setForeground(TEXT_MUTED);
                 }
             }
@@ -114,7 +113,6 @@ public class PanelStok extends JPanel {
         tabelStok.setShowGrid(false);
         tabelStok.setIntercellSpacing(new Dimension(0, 0));
         tabelStok.setSelectionBackground(HIGHLIGHT);
-        tabelStok.setSelectionForeground(TEXT_DARK);
         tabelStok.setFillsViewportHeight(true);
         tabelStok.setBackground(CARD_BG);
 
@@ -134,15 +132,9 @@ public class PanelStok extends JPanel {
                 }
                 if (col == 5 && value != null) {
                     String v = value.toString();
-                    if (v.contains("Aman")) {
-                        setForeground(SUCCESS);
-                    } else if (v.contains("Menipis")) {
-                        setForeground(WARNING);
-                    } else {
-                        setForeground(DANGER);
-                    }
-                } else {
-                    setForeground(!isSelected ? TEXT_DARK : Color.WHITE);
+                    setForeground(v.contains("Aman") ? SUCCESS : v.contains("Menipis") ? WARNING : DANGER);
+                } else if (!isSelected) {
+                    setForeground(TEXT_DARK);
                 }
                 return c;
             }
@@ -164,6 +156,7 @@ public class PanelStok extends JPanel {
 
         JScrollPane scroll = new JScrollPane(tabelStok);
         scroll.setBorder(BorderFactory.createLineBorder(BORDER));
+
         card.add(topBar, BorderLayout.NORTH);
         card.add(scroll, BorderLayout.CENTER);
         return card;
@@ -204,11 +197,11 @@ public class PanelStok extends JPanel {
         btnPanel.setBackground(CARD_BG);
         btnPanel.setBorder(BorderFactory.createEmptyBorder(16, 0, 0, 0));
 
-        JButton btnTambah = createBtn("➕ Tambah", SUCCESS);
-        JButton btnUpdate = createBtn("✏️ Update", ACCENT);
-        JButton btnHapus = createBtn("🗑 Hapus", DANGER);
-        JButton btnReset = createBtn("🔄 Reset", new Color(107, 114, 128));
-        JButton btnTambahStok = createBtn("📈 Tambah Stok", new Color(124, 58, 237));
+        JButton btnTambah = createBtn("Tambah", SUCCESS);
+        JButton btnUpdate = createBtn("Update", ACCENT);
+        JButton btnHapus = createBtn("Hapus", DANGER);
+        JButton btnReset = createBtn("Reset", new Color(107, 114, 128));
+        JButton btnTambahStok = createBtn("Tambah Stok", new Color(124, 58, 237));
 
         btnTambah.addActionListener(e -> tambahBarang());
         btnUpdate.addActionListener(e -> updateBarang());
@@ -237,19 +230,23 @@ public class PanelStok extends JPanel {
         JPanel p = new JPanel(new GridLayout(2, 2, 8, 8));
         p.setBackground(CARD_BG);
         p.setBorder(BorderFactory.createEmptyBorder(16, 0, 0, 0));
-        long total = dm.getDaftarBarang().size();
-        long rendah = dm.getDaftarBarang().stream().filter(b -> b.getStok() <= 10).count();
-        long habis = dm.getDaftarBarang().stream().filter(b -> b.getStok() == 0).count();
-        p.add(createInfoCard("Total Produk", String.valueOf(total), ACCENT));
-        p.add(createInfoCard("Stok Menipis", String.valueOf(rendah), WARNING));
+
+        java.util.List<Barang> all = dm.getDaftarBarang();
+        long totalProduk = all.size();
+        long stokRendah = all.stream().filter(b -> b.getStok() > 0 && b.getStok() <= 10).count();
+        long habis = all.stream().filter(b -> b.getStok() == 0).count();
+
+        p.add(createInfoCard("Total Produk", String.valueOf(totalProduk), ACCENT));
+        p.add(createInfoCard("Stok Menipis", String.valueOf(stokRendah), WARNING));
         p.add(createInfoCard("Stok Habis", String.valueOf(habis), DANGER));
-        p.add(createInfoCard("Aktif", String.valueOf(total - habis), SUCCESS));
+        p.add(createInfoCard("Produk Aktif", String.valueOf(totalProduk - habis), SUCCESS));
         return p;
     }
 
     private JPanel createInfoCard(String label, String value, Color color) {
         JPanel p = new JPanel(new BorderLayout());
-        p.setBackground(color.brighter().brighter().brighter());
+        p.setBackground(new Color(Math.min(color.getRed() + 220, 255),
+                Math.min(color.getGreen() + 220, 255), Math.min(color.getBlue() + 220, 255)));
         p.setBorder(BorderFactory.createCompoundBorder(
                 BorderFactory.createLineBorder(color.brighter(), 1, true),
                 BorderFactory.createEmptyBorder(8, 12, 8, 12)));
@@ -264,7 +261,9 @@ public class PanelStok extends JPanel {
         return p;
     }
 
-    // ===================== CRUD ke DB =====================
+    // =========================================================
+    // CRUD → MySQL
+    // =========================================================
     private void tambahBarang() {
         try {
             String kode = txtKode.getText().trim();
@@ -301,7 +300,7 @@ public class PanelStok extends JPanel {
             b.setHarga(Double.parseDouble(txtHarga.getText().trim()));
             b.setStok(Integer.parseInt(txtStok.getText().trim()));
             b.setKategori((String) cmbKategoriForm.getSelectedItem());
-            dm.updateBarang(b);   // simpan ke DB
+            dm.updateBarang(b);  // simpan ke DB
             refreshTabel("");
             JOptionPane.showMessageDialog(this, "Data barang berhasil diperbarui!", "Sukses", JOptionPane.INFORMATION_MESSAGE);
         } catch (NumberFormatException ex) {
@@ -343,9 +342,11 @@ public class PanelStok extends JPanel {
                 warn("Jumlah harus lebih dari 0!");
                 return;
             }
-            dm.tambahStokBarang(kode, jml);           // update ke DB
-            Barang bUpdated = dm.cariBarang(kode);    // ambil stok terbaru
-            txtStok.setText(String.valueOf(bUpdated.getStok()));
+            dm.tambahStokDB(kode, jml);   // update ke DB
+            Barang updated = dm.cariBarang(kode);
+            if (updated != null) {
+                txtStok.setText(String.valueOf(updated.getStok()));
+            }
             refreshTabel("");
         } catch (NumberFormatException ex) {
             warn("Masukkan angka yang valid!");
@@ -370,18 +371,19 @@ public class PanelStok extends JPanel {
 
     public void refreshTabel(String filter) {
         modelStok.setRowCount(0);
-        String q = filter.toLowerCase().replace("🔍", "").replace("  cari barang...", "").trim();
+        String q = filter.toLowerCase().replace("cari barang...", "").trim();
         for (Barang b : dm.getDaftarBarang()) {
             if (!q.isEmpty() && !b.getNama().toLowerCase().contains(q) && !b.getKode().toLowerCase().contains(q)) {
                 continue;
             }
-            String status = b.getStok() == 0 ? "❌ Habis" : b.getStok() <= 10 ? "⚠️ Menipis" : "✅ Aman";
-            modelStok.addRow(new Object[]{
-                b.getKode(), b.getNama(), rupiah.format(b.getHarga()), b.getStok(), b.getKategori(), status
-            });
+            String status = b.getStok() == 0 ? "Habis" : b.getStok() <= 10 ? "Menipis" : "Aman";
+            modelStok.addRow(new Object[]{b.getKode(), b.getNama(), rupiah.format(b.getHarga()), b.getStok(), b.getKategori(), status});
         }
     }
 
+    // =========================================================
+    // HELPER
+    // =========================================================
     private JTextField createFormField() {
         JTextField tf = new JTextField();
         tf.setFont(new Font("Segoe UI", Font.PLAIN, 13));

@@ -3,6 +3,9 @@ package kasirdigital;
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.*;
+import java.awt.image.BufferedImage;
+import java.io.InputStream;
+import javax.imageio.ImageIO;
 
 public class MainFrame extends JFrame {
 
@@ -38,12 +41,9 @@ public class MainFrame extends JFrame {
 
     private void buildLayout() {
         setLayout(new BorderLayout());
-
-        // Sidebar
         JPanel sidebar = buildSidebar();
         add(sidebar, BorderLayout.WEST);
 
-        // Main content
         cardLayout = new CardLayout();
         contentPanel = new JPanel(cardLayout);
         contentPanel.setBackground(new Color(245, 247, 250));
@@ -65,10 +65,21 @@ public class MainFrame extends JFrame {
         sidebar.setBackground(SIDEBAR_BG);
         sidebar.setPreferredSize(new Dimension(210, 0));
 
-        // Logo / app name
-        JPanel logoPanel = new JPanel(new BorderLayout());
+        JPanel logoPanel = new JPanel(new BorderLayout(10, 0));
         logoPanel.setBackground(SIDEBAR_BG);
-        logoPanel.setBorder(BorderFactory.createEmptyBorder(24, 16, 24, 16));
+        logoPanel.setBorder(BorderFactory.createEmptyBorder(20, 14, 20, 14));
+
+        // --- Gambar logo: dicoba dari beberapa lokasi ---
+        JLabel imgLabel = new JLabel();
+        imgLabel.setPreferredSize(new Dimension(44, 44));
+        Image logoImg = loadLogo();
+        if (logoImg != null) {
+            imgLabel.setIcon(new ImageIcon(logoImg));
+        }
+
+        // --- Teks di kanan gambar ---
+        JPanel textPanel = new JPanel(new BorderLayout());
+        textPanel.setBackground(SIDEBAR_BG);
 
         JLabel logo = new JLabel("SiNiGer");
         logo.setFont(new Font("Segoe UI", Font.BOLD, 17));
@@ -78,17 +89,13 @@ public class MainFrame extends JFrame {
         sub.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         sub.setForeground(new Color(107, 114, 128));
 
-        logoPanel.add(logo, BorderLayout.NORTH);
-        logoPanel.add(sub, BorderLayout.CENTER);
+        textPanel.add(logo, BorderLayout.NORTH);
+        textPanel.add(sub, BorderLayout.CENTER);
 
-        // Separator
-        JPanel sep = new JPanel();
-        sep.setBackground(new Color(31, 41, 55));
-        sep.setPreferredSize(new Dimension(0, 1));
+        logoPanel.add(imgLabel, BorderLayout.WEST);
+        logoPanel.add(textPanel, BorderLayout.CENTER);
 
-        // Navigation
-        JPanel navPanel = new JPanel();
-        navPanel.setLayout(new BoxLayout(navPanel, BoxLayout.Y_AXIS));
+        JPanel navPanel = new JPanel(new GridLayout(3, 1, 0, 4));
         navPanel.setBackground(SIDEBAR_BG);
         navPanel.setBorder(BorderFactory.createEmptyBorder(16, 8, 0, 8));
 
@@ -104,18 +111,14 @@ public class MainFrame extends JFrame {
             final String panel = menus[i][2];
             JButton btn = createNavBtn(menus[i][1]);
             btn.addActionListener(e -> switchPanel(panel, idx));
-            btn.setMaximumSize(new Dimension(Integer.MAX_VALUE, 44));
             navBtns[i] = btn;
             navPanel.add(btn);
-            navPanel.add(Box.createVerticalStrut(4));
         }
 
-        // Bottom info
         JPanel bottomPanel = new JPanel(new BorderLayout());
         bottomPanel.setBackground(SIDEBAR_BG);
         bottomPanel.setBorder(BorderFactory.createEmptyBorder(0, 16, 24, 16));
-
-        JLabel version = new JLabel("v1.0 — 2025");
+        JLabel version = new JLabel("v1.0 - 2025");
         version.setFont(new Font("Segoe UI", Font.PLAIN, 11));
         version.setForeground(new Color(75, 85, 99));
         bottomPanel.add(version, BorderLayout.SOUTH);
@@ -138,7 +141,6 @@ public class MainFrame extends JFrame {
         btn.setOpaque(true);
         btn.setCursor(Cursor.getPredefinedCursor(Cursor.HAND_CURSOR));
         btn.setBorder(BorderFactory.createEmptyBorder(10, 14, 10, 14));
-
         btn.addMouseListener(new MouseAdapter() {
             public void mouseEntered(MouseEvent e) {
                 if (!btn.getBackground().equals(SIDEBAR_ACTIVE)) {
@@ -174,6 +176,59 @@ public class MainFrame extends JFrame {
         if ("stok".equals(name)) {
             panelStok.refreshTabel("");
         }
+    }
+
+    /**
+     * Coba muat logo dari beberapa lokasi secara berurutan. Letakkan logo.jpg
+     * di salah satu tempat berikut: 1. Folder yang sama dengan MainFrame.java
+     * (src/kasirdigital/logo.jpg) 2. Folder root project
+     * (kasirdigital_mysql/logo.jpg) 3. Classpath resource (via
+     * getResourceAsStream)
+     */
+    private Image loadLogo() {
+        // kandidat path — urutan prioritas
+        String[] candidates = {
+            // 1. Relatif dari working directory (saat run dari NetBeans/IntelliJ)
+            "src/kasirdigital/logo.jpg",
+            "src\\kasirdigital\\logo.jpg",
+            // 2. Di samping file .class (setelah compile)
+            "build/classes/kasirdigital/logo.jpg",
+            "out/production/kasirdigital/kasirdigital/logo.jpg",
+            // 3. Root project
+            "logo.jpg",
+            // 4. Folder kasirdigital di root
+            "kasirdigital/logo.jpg",};
+
+        for (String path : candidates) {
+            try {
+                java.io.File f = new java.io.File(path);
+                if (f.exists()) {
+                    BufferedImage raw = ImageIO.read(f);
+                    if (raw != null) {
+                        return raw.getScaledInstance(44, 44, Image.SCALE_SMOOTH);
+                    }
+                }
+            } catch (Exception ignored) {
+            }
+        }
+
+        // 5. Terakhir coba via classpath resource
+        try {
+            InputStream is = MainFrame.class.getResourceAsStream("logo.jpg");
+            if (is == null) {
+                is = MainFrame.class.getResourceAsStream("/kasirdigital/logo.jpg");
+            }
+            if (is != null) {
+                BufferedImage raw = ImageIO.read(is);
+                is.close();
+                if (raw != null) {
+                    return raw.getScaledInstance(44, 44, Image.SCALE_SMOOTH);
+                }
+            }
+        } catch (Exception ignored) {
+        }
+
+        return null; // tidak ditemukan, sidebar tetap tampil tanpa gambar
     }
 
     public static void main(String[] args) {
