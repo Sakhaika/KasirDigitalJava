@@ -307,15 +307,19 @@ public class PanelKasir extends JPanel {
 
     private void hitungTotal() {
         double subtotal = getSubtotalValue();
-        double pajak = subtotal * 0.11;
         double diskonPct = parseDiskon();
         double diskon = subtotal * (diskonPct / 100.0);
-        double total = subtotal + pajak - diskon;
+        double total = subtotal - diskon;
+        double pajak = total * 0.11;
+        double clearTotal = total + pajak;
+//        double diskonPct = parseDiskon();
+//        double diskon = subtotal * (diskonPct / 100.0);
+//        double total = subtotal + pajak - diskon;
 
         lblSubtotal.setText(rupiah.format(subtotal));
         lblPajak.setText(rupiah.format(pajak));
         lblDiskon.setText(rupiah.format(diskon));
-        lblTotal.setText(rupiah.format(total));
+        lblTotal.setText(rupiah.format(clearTotal));
         hitungKembalian();
     }
 
@@ -331,10 +335,17 @@ public class PanelKasir extends JPanel {
     }
 
     private double getTotal() {
-        double subtotal = getSubtotalValue();
-        double pajak = subtotal * 0.11;
+//        double subtotal = getSubtotalValue();
+//        double pajak = subtotal * 0.11;
+//        double diskonPct = parseDiskon();
+//        return subtotal + pajak - (subtotal * (diskonPct / 100.0));
+double subtotal = getSubtotalValue();
         double diskonPct = parseDiskon();
-        return subtotal + pajak - (subtotal * (diskonPct / 100.0));
+        double diskon = subtotal * (diskonPct / 100.0);
+        double total = subtotal - diskon;
+        double pajak = total * 0.11;
+        double clearTotal = total + pajak;
+        return clearTotal;
     }
 
     private double parseDiskon() {
@@ -386,8 +397,8 @@ public class PanelKasir extends JPanel {
         struk.append("-----------------------------------\n");
 
         double subtotal = getSubtotalValue();
-        double pajak = subtotal * 0.11;
         double diskon = subtotal * (parseDiskon() / 100.0);
+        double pajak = (subtotal - diskon) * 0.11;
 
         for (ItemKeranjang item : keranjang) {
             struk.append(String.format("%-20s\n  %d x %-10s = %s\n",
